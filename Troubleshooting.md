@@ -1,0 +1,4 @@
+How to enable logs:
+CCOW_LOG_STDOUT=1
+CCOW_LOG_LEVEL=0
+CCOW_LOG_COLORS=1
