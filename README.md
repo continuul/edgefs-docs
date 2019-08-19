@@ -1,4 +1,4 @@
 # edgefs-docs
 
-EdgeFS Public Documentation Version 0.0.2
+EdgeFS Public Documentation Version 1.0.0
 
