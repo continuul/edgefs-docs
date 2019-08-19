@@ -1,3 +1,5 @@
+# Quick-Start---Docker
+
 ## EdgeFS Docker container
 
 Although Setting up a EdgeFS environment is a pretty simple and straight forward procedure, community do maintain docker base image in the docker hub for the ease of use.
@@ -6,19 +8,19 @@ The following are the steps to run the EdgeFS docker images:
 
 To pull the docker image from the docker hub run the following command:
 
-<pre>
-docker pull edgefs/edgefs:latest
-</pre>
+```text
 
-This will pull the EdgeFS docker image from the docker hub.
-Alternatively, one could build the image from the Dockerfile directly as shown on the main page.
+docker pull edgefs/edgefs:latest
+```
+
+This will pull the EdgeFS docker image from the docker hub. Alternatively, one could build the image from the Dockerfile directly as shown on the main page.
 
 Once the image is built or pulled, ensure the following directories are created on the host where docker is running:
 
- - /edgefs/etc
- - /edgefs/var/run
- - /edgefs/var/log
- - /edgefs/data
+* /edgefs/etc
+* /edgefs/var/run
+* /edgefs/var/log
+* /edgefs/data
 
 Ensure all the above directories are empty to avoid any conflicts.
 
@@ -32,34 +34,38 @@ Time synchronization isn't required but highly recommended as it will keep file 
 
 Run the following commands:
 
-<pre>
+```text
+
 mkdir -p /edgefs/var/run /edgefs/var/log /edgefs/data /edgefs/etc
 docker run -d -v /edgefs/var/run:/opt/nedge/var/run:z \
               -v /edgefs/var/log:/opt/nedge/var/log:z \
               -v /edgefs/etc:/opt/nedge/etc:z \
               -v /edgefs/data:/data:z \
               edgefs/edgefs:latest solo
-</pre>
+```
 
 Bind mounting of following directories enables:
-<pre>
+
+```text
+
         `/edgefs/etc`     : To make configuration persistent in the host.
         `/edgefs/var/log` : To make log files persistent in the host.
         `/edgefs/var/run` : To make state files persistent in the host.
         `/edgefs/data`    : To make metadata and data persistent in the host.
-</pre>
+```
 
-It will use eth0 networking device by default inside of the container and create 4 emulated devices in /edgefs/data/device-{0,1,2,3}. If you want to use different networking interface pass environment variable like this "-e NEDGE_SOLOIF=eth1".
+It will use eth0 networking device by default inside of the container and create 4 emulated devices in /edgefs/data/device-{0,1,2,3}. If you want to use different networking interface pass environment variable like this "-e NEDGE\_SOLOIF=eth1".
 
-Notice that in case of forceful container termination (docker rm -f) /edgefs/var/run/\*.pid files may prevent container from starting again. Clean up \*.pid files if that happens.
+Notice that in case of forceful container termination \(docker rm -f\) /edgefs/var/run/\*.pid files may prevent container from starting again. Clean up \*.pid files if that happens.
 
 At this point, a single node cluster should be formed and ready to be initialized.
 
 You will need to login into the container in terms of to get access to `efscli` administration tool. You can use `toolbox` command:
 
-<pre>
+```text
+
 docker exec -it CONTAINERID toolbox
-</pre>
+```
 
 Follow [Quick Start on Initialization](https://github.com/Nexenta/edgefs/wiki/Quick-Start---Initialization) to continue with setting it up and later bringing up services you need.
 
@@ -79,10 +85,10 @@ For storage devices, you need to decide what you want to use for persistent stor
 
 #### Case 1: Utilizing raw disks
 
-To enable usage of raw disks, they need to be completely empty, without partitions or filesystems. Use `wipefs -a /dev/DEV` command to clear them up. EdgeFS node config tool will autodetect available disks and enable optimal configuration to use.
-Run the following interactive command on all the nodes which you want to be part of cluster and serve HDDs or SSD/NVMe as raw disks:
+To enable usage of raw disks, they need to be completely empty, without partitions or filesystems. Use `wipefs -a /dev/DEV` command to clear them up. EdgeFS node config tool will autodetect available disks and enable optimal configuration to use. Run the following interactive command on all the nodes which you want to be part of cluster and serve HDDs or SSD/NVMe as raw disks:
 
-<pre>
+```text
+
 docker run --rm -it -v /edgefs/var/run:/opt/nedge/var/run:z  \
               -v /edgefs/var/log:/opt/nedge/var/log:z \
               -v /edgefs/etc:/opt/nedge/etc:z \
@@ -91,13 +97,14 @@ docker run --rm -it -v /edgefs/var/run:/opt/nedge/var/run:z  \
               edgefs/edgefs:latest config \
                   -i eth0 -d rtrd -p rtrdMDOffload \
                   -l node1 -l node2 -l node3
-</pre>
+```
 
 #### Case 2: Utilizing local directories
 
 Run the following interactive command on all the nodes which you want to be part of a cluster serving /edgefs/data directory:
 
-<pre>
+```text
+
 docker run --rm -it -v /edgefs/var/run:/opt/nedge/var/run:z  \
               -v /edgefs/var/log:/opt/nedge/var/log:z \
               -v /edgefs/etc:/opt/nedge/etc:z \
@@ -107,27 +114,29 @@ docker run --rm -it -v /edgefs/var/run:/opt/nedge/var/run:z  \
               edgefs/edgefs:latest config \
                   -i eth0 -d rtlfs \
                   -l node1 -l node2 -l node3
-</pre>
+```
 
-Where (both cases options aggregated):
+Where \(both cases options aggregated\):
 
 | Option | Notes |
-|--------|-------|
+| :--- | :--- |
 | --net=host | This option brings maximum network throughput for your storage container |
 | --privileged=true | If you are exposing the `/dev/` tree of host to the container to use raw disks |
 | -i eth0 | Networking interface to use for backend I/O |
 | -d rtrd | Selecting RTRD driver, e.g. Raw Disk w/o the need for Filesystem, or rtlfs for directories |
 | -p rtrdMDOffload | Enable hybrid HDD with Metadata on SSD profile, groups will be autodetected |
-| -l node1 -l ... | List of data nodes which will be part of the local cluster namespace (site). Can be IPv4 addresses or resolvable hostnames of interfaces where FlexHash needs to be communicating on. Typically colocated with backend networking device. |
+| -l node1 -l ... | List of data nodes which will be part of the local cluster namespace \(site\). Can be IPv4 addresses or resolvable hostnames of interfaces where FlexHash needs to be communicating on. Typically colocated with backend networking device. |
 
 Bind mounting of following directories enables:
-<pre>
+
+```text
+
         `/edgefs/etc`     : To make configuration persistent in the host.
         `/edgefs/var/log` : To make log files persistent in the host.
         `/edgefs/var/run` : To make state files persistent in the host.
         `/edgefs/data`    : In case of `rtlfs` use this host location as emulated storage devices.
         `/run/udev`       : To access extended device attributes via udevadm.
-</pre>
+```
 
 ### Connect data nodes into the cluster
 
@@ -137,21 +146,24 @@ For all data nodes, to get optimal performance please apply the appropriate [Per
 
 Now that all the nodes successfully initialized, run the following command on all then nodes where you want to run "Target" software:
 
-<pre>
+```text
+
 docker run -d -v /edgefs/var/run:/opt/nedge/var/run:z  \
               -v /edgefs/var/log:/opt/nedge/var/log:z \
               -v /edgefs/etc:/opt/nedge/etc:z \
               -v /edgefs/data:/data:z \
               --privileged=true --net=host -v /dev/:/dev \
               edgefs/edgefs:latest target
-</pre>
+```
 
 At this point, the cluster should be formed and ready to be initialized.
 
 You will need to login into the container in terms of to get access to `efscli` administration tool. You can use `toolbox` command:
 
-<pre>
+```text
+
 docker exec -it CONTAINERID toolbox
-</pre>
+```
 
 Follow [Quick Start on Initialization](https://github.com/Nexenta/edgefs/wiki/Quick-Start---Initialization) to continue with setting it up and later bringing up services you need.
+

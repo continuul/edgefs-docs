@@ -1,10 +1,12 @@
-EdgeFS designed for high performance and massive scalability beyond 1000 servers per single site / namespace physical cluster. It doesn't need to have central metadata server(s) or coordination server(s). Architecture is true "shared nothing" with metadata and data fully distributed across the physical nodes with zoned disks in cluster. While not required, to operate optimally and at highest possible performance, EdgeFS needs dedicated high-performance network for cluster backend communications, isolated with VLAN segment, set for use of Jumbo Frames and preferably non-blocking switch with Flow-Control enabled.
+# Performance-Host-Settings
+
+EdgeFS designed for high performance and massive scalability beyond 1000 servers per single site / namespace physical cluster. It doesn't need to have central metadata server\(s\) or coordination server\(s\). Architecture is true "shared nothing" with metadata and data fully distributed across the physical nodes with zoned disks in cluster. While not required, to operate optimally and at highest possible performance, EdgeFS needs dedicated high-performance network for cluster backend communications, isolated with VLAN segment, set for use of Jumbo Frames and preferably non-blocking switch with Flow-Control enabled.
 
 The following are the recommendations you should set on all data nodes where you planning to run "Target" software.
 
 Set optimal host sysctl parameters:
 
-```
+```text
 #
 # Avoid occasional UDP drops and improve networking performance of
 # Replicast backend network. It can also be set on per interface basis!
@@ -32,3 +34,4 @@ echo "net.ipv6.ip6frag_low_thresh = 7000000" >> /etc/sysctl.conf
 echo "net.ipv6.ip6frag_time = 120" >> /etc/sysctl.conf
 sysctl -p
 ```
+
